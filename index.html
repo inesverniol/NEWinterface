@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Contrôle Pince UR10</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #1f2937;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-weight: bold;
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #374151;
+    }
+
+    .control-panel, .feedback-panel {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+      margin: 20px 0;
+    }
+
+    .gripper-controls, .wrist-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .gripper-buttons {
+      display: flex;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .gripper-buttons button, .wrist-grid button {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 12px 18px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: background-color 0.2s;
+    }
+
+    .gripper-buttons button:hover, .wrist-grid button:hover {
+      background-color: #2563eb;
+    }
+
+    .wrist-grid {
+      display: grid;
+      grid-template-columns: 60px 60px 60px;
+      grid-template-rows: 60px 60px 60px;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .sensor-display {
+      background: #e5e7eb;
+      padding: 15px 25px;
+      border-radius: 12px;
+      text-align: center;
+      min-width: 160px;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    #gripper-view {
+      width: 200px;
+      height: 200px;
+      border: 2px solid #d1d5db;
+      margin-top: 20px;
+      border-radius: 10px;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gripper-icon {
+      width: 80px;
+      height: 120px;
+      background-color: #4b5563;
+      border-radius: 10px;
+      transition: transform 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <h1>Contrôle de la Pince UR10</h1>
+
+  <div class="control-panel">
+    <!-- Bloc pince -->
+    <div class="gripper-controls">
+      <div class="gripper-buttons">
+        <button onclick="sendCommand('open')">Ouvrir</button>
+        <button onclick="sendCommand('stop')">Stop</button>
+        <button onclick="sendCommand('close')">Fermer</button>
+      </div>
+      <div class="section-title">Pince</div>
+    </div>
+
+    <!-- Bloc poignet -->
+    <div class="wrist-controls">
+      <div class="section-title">Poignet</div>
+      <div class="wrist-grid">
+        <div></div>
+        <button onclick="sendCommand('up')">🔼</button>
+        <div></div>
+        <button onclick="sendCommand('rotate_left')">↺</button>
+        <div></div>
+        <button onclick="sendCommand('rotate_right')">↻</button>
+        <div></div>
+        <button onclick="sendCommand('down')">🔽</button>
+        <div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feedback-panel">
+    <div class="sensor-display" id="forceDisplay">Force: -- N</div>
+    <div class="sensor-display" id="positionDisplay">Position: -- °</div>
+  </div>
+
+  <div id="gripper-view">
+    <div class="gripper-icon" id="gripperIcon"></div>
+  </div>
+
+  <script>
+    function sendCommand(action) {
+      const ip = "http://127.0.0.1:5500/index.html"; // ← à remplacer par l'IP réelle de l’ESP32
+      let endpoint = "";
+
+      if (action === "open") endpoint = "/open";
+      else if (action === "close") endpoint = "/close";
+      else if (action === "stop") endpoint = "/stop";
+      else if (action === "rotate_left") endpoint = "/rotate_left";
+      else if (action === "rotate_right") endpoint = "/rotate_right";
+      else if (action === "up") endpoint = "/move_up";
+      else if (action === "down") endpoint = "/move_down";
+
+      fetch(`${ip}${endpoint}`)
+        .then(response => response.text())
+        .then(text => console.log("Réponse ESP32:", text))
+        .catch(err => console.error("Erreur:", err));
+    }
+
+    // Simulation visuelle
+    function updateForceDisplay(force) {
+      document.getElementById('forceDisplay').textContent = `Force: ${force.toFixed(2)} N`;
+    }
+
+    function updatePositionDisplay(angle) {
+      document.getElementById('positionDisplay').textContent = `Position: ${angle.toFixed(1)} °`;
+      const icon = document.getElementById('gripperIcon');
+      icon.style.transform = `rotate(${angle}deg)`;
+    }
+
+    setInterval(() => {
+      const fakeForce = Math.random() * 10;
+      const fakeAngle = (Date.now() / 50) % 360;
+      updateForceDisplay(fakeForce);
+      updatePositionDisplay(fakeAngle);
+    }, 200);
+  </script>
+</body>
+</html>
