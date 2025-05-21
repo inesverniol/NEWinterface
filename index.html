@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Contrôle Pince UR10</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      margin: 0; padding: 20px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    h1 {
+      color: #1e40af;
+      margin-bottom: 30px;
+    }
+    .section {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgb(0 0 0 / 0.1);
+      margin-bottom: 30px;
+      width: 320px;
+      text-align: center;
+    }
+    .section h2 {
+      margin-bottom: 15px;
+      color: #334155;
+    }
+    button {
+      background-color: #2563eb;
+      border: none;
+      color: white;
+      padding: 12px 20px;
+      margin: 5px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s;
+      width: 90px;
+    }
+    button:hover {
+      background-color: #1d4ed8;
+    }
+    button:active {
+      background-color: #1e40af;
+    }
+    .btn-stop {
+      background-color: #dc2626;
+      width: 200px;
+      margin-top: 15px;
+    }
+    .btn-stop:hover {
+      background-color: #b91c1c;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Contrôle Pince UR10</h1>
+
+  <div class="section" id="pince-control">
+    <h2>Pince</h2>
+    <button id="btn-open">Ouvrir</button>
+    <button id="btn-close">Fermer</button>
+    <br />
+    <button id="btn-stop-pince" class="btn-stop">Stop Pince</button>
+  </div>
+
+  <div class="section" id="poignet-translation-control">
+    <h2>Poignet - Translation</h2>
+    <button id="btn-up">Avant ⬆️</button>
+    <button id="btn-down">Arrière ⬇️</button>
+    <br />
+    <button id="btn-stop-translation" class="btn-stop">Stop Translation</button>
+  </div>
+
+  <div class="section" id="poignet-rotation-control">
+    <h2>Poignet - Rotation</h2>
+    <button id="btn-left">Gauche ↺</button>
+    <button id="btn-right">Droite ↻</button>
+    <br />
+    <button id="btn-stop-rotation" class="btn-stop">Stop Rotation</button>
+  </div>
+
+  <script>
+    // Remplace par l'IP de ton ESP32 sur ton réseau
+    const baseURL = "http://192.168.1.42"; // CHANGE À TON IP
+
+    function sendCommand(endpoint) {
+      fetch(baseURL + endpoint)
+        .then(res => res.text())
+        .then(text => console.log(`Réponse ESP32: ${text}`))
+        .catch(err => console.error("Erreur:", err));
+    }
+
+    // Utiliser mousedown pour démarrer la commande,
+    // et mouseup/mouseleave pour arrêter (stop)
+
+    // Pince
+    const btnOpen = document.getElementById("btn-open");
+    const btnClose = document.getElementById("btn-close");
+    const btnStopPince = document.getElementById("btn-stop-pince");
+
+    btnOpen.addEventListener("mousedown", () => sendCommand("/open"));
+    btnOpen.addEventListener("mouseup", () => sendCommand("/stop"));
+    btnOpen.addEventListener("mouseleave", () => sendCommand("/stop"));
+
+    btnClose.addEventListener("mousedown", () => sendCommand("/close"));
+    btnClose.addEventListener("mouseup", () => sendCommand("/stop"));
+    btnClose.addEventListener("mouseleave", () => sendCommand("/stop"));
+
+    btnStopPince.addEventListener("click", () => sendCommand("/stop"));
+
+    // Poignet Translation
+    const btnUp = document.getElementById("btn-up");
+    const btnDown = document.getElementById("btn-down");
+    const btnStopTranslation = document.getElementById("btn-stop-translation");
+
+    btnUp.addEventListener("mousedown", () => sendCommand("/up"));
+    btnUp.addEventListener("mouseup", () => sendCommand("/stop"));
+    btnUp.addEventListener("mouseleave", () => sendCommand("/stop"));
+
+    btnDown.addEventListener("mousedown", () => sendCommand("/down"));
+    btnDown.addEventListener("mouseup", () => sendCommand("/stop"));
+    btnDown.addEventListener("mouseleave", () => sendCommand("/stop"));
+
+    btnStopTranslation.addEventListener("click", () => sendCommand("/stop"));
+
+    // Poignet Rotation
+    const btnLeft = document.getElementById("btn-left");
+    const btnRight = document.getElementById("btn-right");
+    const btnStopRotation = document.getElementById("btn-stop-rotation");
+
+    btnLeft.addEventListener("mousedown", () => sendCommand("/left"));
+    btnLeft.addEventListener("mouseup", () => sendCommand("/stop"));
+    btnLeft.addEventListener("mouseleave", () => sendCommand("/stop"));
+
+    btnRight.addEventListener("mousedown", () => sendCommand("/right"));
+    btnRight.addEventListener("mouseup", () => sendCommand("/stop"));
+    btnRight.addEventListener("mouseleave", () => sendCommand("/stop"));
+
+    btnStopRotation.addEventListener("click", () => sendCommand("/stop"));
+  </script>
+</body>
+</html>
